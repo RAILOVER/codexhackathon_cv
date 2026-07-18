@@ -151,7 +151,9 @@ export async function runGinseOperation(request: Request): Promise<Response> {
     }
 
     try {
-      const output = validateOutput(await runCandidateSourcingAgent({ cvText: input.cvText }));
+      // The fixed Ginse action uses the project’s vetted funding snapshot so
+      // every invocation completes within the marketplace verification window.
+      const output = validateOutput(await runCandidateSourcingAgent({ cvText: input.cvText, forceCache: true }));
       const completed: StoredOperation = { ...claimed, status: "succeeded", output };
       await store.setJSON(key, completed, { onlyIfMatch: claim.etag });
       return response({ status: "succeeded", provider_operation_id: providerOperationId, replayed: false, output });
