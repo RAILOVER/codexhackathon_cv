@@ -106,6 +106,11 @@ export async function runGinseOperation(request: Request): Promise<Response> {
   if (request.method !== "POST") return response({ error: "Use POST." }, 405);
   try {
     await requireGinseBearer(request);
+  } catch (error) {
+    return response({ error: error instanceof Error ? error.message : "Unauthorized request." }, 401);
+  }
+
+  try {
     const idempotencyKey = request.headers.get("idempotency-key")?.trim() ?? "";
     if (!/^[A-Za-z0-9._-]{8,200}$/.test(idempotencyKey)) {
       return response({ error: "A valid Idempotency-Key is required." }, 400);
@@ -146,7 +151,7 @@ export async function runGinseOperation(request: Request): Promise<Response> {
       return response({ status: "failed", provider_operation_id: providerOperationId, replayed: false, error: failed.error }, 500);
     }
   } catch (error) {
-    return response({ error: error instanceof Error ? error.message : "Unauthorized request." }, 401);
+    return response({ error: error instanceof Error ? error.message : "Could not process the Ginse run." }, 500);
   }
 }
 
@@ -154,6 +159,11 @@ export async function getGinseOperation(request: Request, providerOperationId: s
   if (request.method !== "GET") return response({ error: "Use GET." }, 405);
   try {
     await requireGinseBearer(request);
+  } catch (error) {
+    return response({ error: error instanceof Error ? error.message : "Unauthorized request." }, 401);
+  }
+
+  try {
     if (!/^goat_[a-f0-9]{64}$/.test(providerOperationId)) return response({ error: "Unknown operation." }, 404);
     const saved = await store.get(operationStoreKey(providerOperationId), { type: "json", consistency: "strong" }) as StoredOperation | null;
     if (!saved) return response({ error: "Unknown operation." }, 404);
@@ -163,6 +173,6 @@ export async function getGinseOperation(request: Request, providerOperationId: s
     if (saved.status === "failed") return response({ status: "failed", provider_operation_id: saved.providerOperationId, error: saved.error ?? "Operation failed." }, 500);
     return response({ status: "pending", provider_operation_id: saved.providerOperationId, status_url: statusUrl(request, saved.providerOperationId) }, 202);
   } catch (error) {
-    return response({ error: error instanceof Error ? error.message : "Unauthorized request." }, 401);
+    return response({ error: error instanceof Error ? error.message : "Could not read the Ginse run." }, 500);
   }
 }
