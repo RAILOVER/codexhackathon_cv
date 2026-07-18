@@ -6,6 +6,10 @@ Un agent qui reçoit un **CV uniquement** et retourne une sélection d’entrepr
 
 `POST /api/agent`
 
+Déploiement : `GET /api/health` retourne un statut JSON lorsque la fonction
+Netlify est bien publiée. La racine `/` affiche une page d’état minimale afin
+qu’un déploiement ne réponde jamais par une 404 silencieuse.
+
 Entrée JSON :
 
 ```json
