@@ -26,7 +26,10 @@ export async function extractTextFromPdf(pdf: Buffer): Promise<string> {
   // `pdf-parse` loads PDF.js, which expects DOM globals unavailable in a
   // Netlify function. Loading it only for real PDF inputs keeps text-only
   // Ginse runs and the authorization gate available at cold start.
-  const { PDFParse } = await import("pdf-parse");
+  // Keep the optional parser out of esbuild's eager function bundle as well:
+  // its PDF.js dependency evaluates DOM-only code at module initialization.
+  const loadPdfParse = new Function("moduleName", "return import(moduleName);") as (moduleName: string) => Promise<typeof import("pdf-parse")>;
+  const { PDFParse } = await loadPdfParse("pdf-parse");
   const parser = new PDFParse({ data: new Uint8Array(pdf) });
 
   try {
