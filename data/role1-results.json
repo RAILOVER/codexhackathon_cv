@@ -1,0 +1,163 @@
+{
+  "geographicZone": "Monde entier",
+  "selectionCount": 6,
+  "cvExtractionMethod": "heuristic",
+  "companies": [
+    {
+      "companyName": "Tsuga",
+      "description": "Tsuga est une plateforme d'observabilité de nouvelle génération construite sur un modèle BYOC (Bring Your Own Cloud).",
+      "fundingDate": "2026-06-29",
+      "articleUrl": "https://www.maddyness.com/2026/06/29/les-startups-francaises-ont-leve-706-millions-deuros-la-semaine-derniere/",
+      "websiteUrl": "https://tsuga.com/",
+      "siren": "750314429",
+      "legalForm": "Société à responsabilité limitée (SARL)",
+      "legalRepresentative": null,
+      "headquarters": {
+        "address": "DOMAINE DE SAINT PAUL 102 ROUTE DE LIMOURS 78470 SAINT-REMY-LES-CHEVREUSE",
+        "city": "SAINT-REMY-LES-CHEVREUSE",
+        "postalCode": "78470",
+        "department": "78",
+        "regionCode": "11"
+      },
+      "contact": {
+        "email": null,
+        "contactPageUrl": "https://www.tsuga.com/resources/contact/start-trial"
+      },
+      "match": {
+        "score": 0.3,
+        "matchedSkills": [],
+        "justification": "secteur compatible : développement logiciel, data et IA"
+      }
+    },
+    {
+      "companyName": "Haiku",
+      "description": "Haiku est une solution SaaS juridique directement connectée aux outils internes des avocats et aux bases de données juridiques externes, permettant aux professionnels du droit d’effectuer des recherches documentaires contextualisées et ciblées.",
+      "fundingDate": "2026-06-29",
+      "articleUrl": "https://www.maddyness.com/2026/06/29/les-startups-francaises-ont-leve-706-millions-deuros-la-semaine-derniere/",
+      "websiteUrl": "https://haiku.fr",
+      "siren": "538640046",
+      "legalForm": "6599",
+      "legalRepresentative": "CORALIE FRANCOISE THERESE POULIN (GARBAY)",
+      "headquarters": {
+        "address": "LOTISSEMENT TERRASSES DE CUL DE SAC 97150 SAINT-MARTIN",
+        "city": "SAINT-MARTIN",
+        "postalCode": "97150",
+        "department": "978",
+        "regionCode": null
+      },
+      "contact": {
+        "email": null,
+        "contactPageUrl": "https://www.haiku.fr/contact"
+      },
+      "match": {
+        "score": 0.3,
+        "matchedSkills": [],
+        "justification": "secteur compatible : développement logiciel, data et IA"
+      }
+    },
+    {
+      "companyName": "En Carta Diagnostics",
+      "description": "En Carta Diagnostics est une société de biotechnologie de biologie synthétique qui exploite des technologies brevetées pour décentraliser des solutions de diagnostic moléculaire hautement fiables.",
+      "fundingDate": "2026-07-17",
+      "articleUrl": "https://www.maddyness.com/2026/07/17/les-startups-francaises-ont-leve-56-millions-deuros-la-semaine-derniere/",
+      "websiteUrl": "http://www.encarta.bio",
+      "siren": "912293784",
+      "legalForm": "Société par actions simplifiée (SAS)",
+      "legalRepresentative": "GUILLAUME HORREARD",
+      "headquarters": {
+        "address": "4 RUE EMILE ZOLA 92240 MALAKOFF",
+        "city": "MALAKOFF",
+        "postalCode": "92240",
+        "department": "92",
+        "regionCode": "11"
+      },
+      "contact": {
+        "email": "contact@encarta.bio",
+        "contactPageUrl": null
+      },
+      "match": {
+        "score": 0.19,
+        "matchedSkills": [],
+        "justification": "secteur compatible : data et IA"
+      }
+    },
+    {
+      "companyName": "Stracker",
+      "description": "Stracker construit l’infrastructure numérique pour les opérations de fret critiques.",
+      "fundingDate": "2026-07-17",
+      "articleUrl": "https://www.maddyness.com/2026/07/17/les-startups-francaises-ont-leve-56-millions-deuros-la-semaine-derniere/",
+      "websiteUrl": "http://www.stracker.tech",
+      "siren": "831129531",
+      "legalForm": "Société par actions simplifiée (SAS)",
+      "legalRepresentative": "AXEL HAMILTON BANDIAKY",
+      "headquarters": {
+        "address": "55 RUE LA BOETIE 75008 PARIS",
+        "city": "PARIS",
+        "postalCode": "75008",
+        "department": "75",
+        "regionCode": "11"
+      },
+      "contact": {
+        "email": null,
+        "contactPageUrl": "https://www.stracker.tech/contact"
+      },
+      "match": {
+        "score": 0.19,
+        "matchedSkills": [],
+        "justification": "secteur compatible : développement logiciel"
+      }
+    },
+    {
+      "companyName": "Mio",
+      "description": "Mio est un collègue IA qui vit sur",
+      "fundingDate": "2026-07-17",
+      "articleUrl": "https://www.maddyness.com/2026/07/17/les-startups-francaises-ont-leve-56-millions-deuros-la-semaine-derniere/",
+      "websiteUrl": "https://www.mio.xyz",
+      "siren": "100121276",
+      "legalForm": "Société par actions simplifiée (SAS)",
+      "legalRepresentative": "RAMA VALENTIN KEO",
+      "headquarters": {
+        "address": "5 CHEMIN DE GOURGUEUIL 03330 COUTANSOUZE",
+        "city": "COUTANSOUZE",
+        "postalCode": "03330",
+        "department": "03",
+        "regionCode": "84"
+      },
+      "contact": {
+        "email": "careers@mio.xyz",
+        "contactPageUrl": null
+      },
+      "match": {
+        "score": 0.19,
+        "matchedSkills": [],
+        "justification": "secteur compatible : data et IA"
+      }
+    },
+    {
+      "companyName": "Sopht",
+      "description": "Sopht est une plateforme qui permet aux organisations IT de piloter de manière dynamique leur empreinte environnementale et d’automatiser leur trajectoire de décarbonation.",
+      "fundingDate": "2026-06-29",
+      "articleUrl": "https://www.maddyness.com/2026/06/29/les-startups-francaises-ont-leve-706-millions-deuros-la-semaine-derniere/",
+      "websiteUrl": "https://sopht.com",
+      "siren": "439505504",
+      "legalForm": "Société civile immobilière (SCI)",
+      "legalRepresentative": "JACKY ALTOE",
+      "headquarters": {
+        "address": "9 RUE FOCH 90300 CRAVANCHE",
+        "city": "CRAVANCHE",
+        "postalCode": "90300",
+        "department": "90",
+        "regionCode": "27"
+      },
+      "contact": {
+        "email": "contact@sopht.com",
+        "contactPageUrl": null
+      },
+      "match": {
+        "score": 0.19,
+        "matchedSkills": [],
+        "justification": "secteur compatible : développement logiciel"
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+node_modules/
+.pnpm-store/
+tmp/
+data/latest-fundings.json
+data/enriched-fundings.json
+data/contact-enriched-fundings.json
+data/cv-profile.json
+data/matched-companies.json
+data/*.txt
+!data/sample-cv.txt
+.env
