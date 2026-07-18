@@ -31,6 +31,16 @@ type StoredOperation = {
   error?: string;
 };
 
+type Diagnostic = {
+  at: string;
+  headerNames: string[];
+  idempotencyHash: string;
+  bodyKeys: string[];
+  bindingClaimModified?: boolean;
+  operationClaimModified?: boolean;
+  operationId?: string;
+};
+
 export function response(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
     status,
@@ -140,6 +150,19 @@ function idempotencyStoreKey(idempotencyKey: string): string {
   return `idempotency-v7/${createHash("sha256").update(idempotencyKey).digest("hex")}`;
 }
 
+function hashValue(value: string): string {
+  return createHash("sha256").update(value).digest("hex").slice(0, 16);
+}
+
+async function saveDiagnostic(diagnostic: Diagnostic): Promise<void> {
+  await operationStore().set("diagnostic/latest", JSON.stringify(diagnostic));
+}
+
+export async function getDiagnostic(): Promise<Response> {
+  const raw = await operationStore().get("diagnostic/latest", { type: "json", consistency: "strong" });
+  return response(raw ?? { status: "No Ginse invocation recorded yet." });
+}
+
 function statusUrl(request: Request, providerOperationId: string): string {
   const url = new URL(request.url);
   return `${url.origin}/run/status/${providerOperationId}`;
@@ -177,6 +200,12 @@ export async function runGinseOperation(request: Request): Promise<Response> {
     const input = parseProviderRequest(body);
     const store = operationStore();
     const requestFingerprint = fingerprint(input);
+    const baseDiagnostic: Diagnostic = {
+      at: new Date().toISOString(),
+      headerNames: [...request.headers.keys()].sort(),
+      idempotencyHash: hashValue(idempotencyKey),
+      bodyKeys: body && typeof body === "object" && !Array.isArray(body) ? Object.keys(body as Record<string, unknown>).sort() : [],
+    };
     const bindingKey = idempotencyStoreKey(idempotencyKey);
     const binding: Pick<StoredOperation, "fingerprint" | "providerOperationId"> = {
       fingerprint: requestFingerprint,
@@ -195,6 +224,12 @@ export async function runGinseOperation(request: Request): Promise<Response> {
     const key = operationStoreKey(providerOperationId);
     const claimed: StoredOperation = { fingerprint: requestFingerprint, providerOperationId, status: "pending" };
     const claim = await store.set(key, JSON.stringify(claimed), { onlyIfNew: true });
+    await saveDiagnostic({
+      ...baseDiagnostic,
+      bindingClaimModified: bindingClaim.modified,
+      operationClaimModified: claim.modified,
+      operationId: providerOperationId,
+    });
 
     if (!claim.modified) {
       const found = await store.get(key, { type: "json", consistency: "strong" }) as StoredOperation | null;
