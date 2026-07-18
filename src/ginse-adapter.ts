@@ -123,11 +123,11 @@ function operationId(requestFingerprint: string): string {
 }
 
 function operationStoreKey(providerOperationId: string): string {
-  return `operations/${providerOperationId}`;
+  return `operations-v3/${providerOperationId}`;
 }
 
 function idempotencyStoreKey(idempotencyKey: string): string {
-  return `idempotency/${createHash("sha256").update(idempotencyKey).digest("hex")}`;
+  return `idempotency-v3/${createHash("sha256").update(idempotencyKey).digest("hex")}`;
 }
 
 function statusUrl(request: Request, providerOperationId: string): string {
