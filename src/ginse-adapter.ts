@@ -71,7 +71,7 @@ function parseProviderRequest(value: unknown): GinseInput {
   // bare form also makes the endpoint easy to test directly.
   if (value && typeof value === "object" && !Array.isArray(value) && "input" in value) {
     const envelope = value as Record<string, unknown>;
-    if (Object.keys(envelope).length === 1) return parseInput(envelope.input);
+    return parseInput(envelope.input);
   }
   return parseInput(value);
 }
