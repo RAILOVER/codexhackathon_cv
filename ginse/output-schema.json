@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sourceMode", "profile", "companies", "warnings", "geographicZone", "cvFileName"],
+  "properties": {
+    "sourceMode": { "type": "string", "enum": ["live", "cache"] },
+    "profile": {
+      "type": "object",
+      "required": ["skills", "jobTitles", "targetRoles", "experiences", "extractionMethod"],
+      "properties": {
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "jobTitles": { "type": "array", "items": { "type": "string" } },
+        "targetRoles": { "type": "array", "items": { "type": "string" } },
+        "experiences": { "type": "array" },
+        "extractionMethod": { "type": "string", "enum": ["heuristic", "llm"] }
+      }
+    },
+    "companies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "score", "scoreReason", "matchedSkills", "contact", "application"],
+        "properties": {
+          "name": { "type": "string" },
+          "score": { "type": "number" },
+          "scoreReason": { "type": "string" },
+          "matchedSkills": { "type": "array", "items": { "type": "string" } },
+          "contact": { "type": "object" },
+          "application": { "type": "object" }
+        }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "geographicZone": { "const": "Monde entier" },
+    "cvFileName": { "type": ["string", "null"] }
+  }
+}

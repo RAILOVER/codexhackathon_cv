@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["cvText"],
+  "properties": {
+    "cvText": {
+      "type": "string",
+      "minLength": 40,
+      "maxLength": 100000,
+      "description": "Plain text extracted from the candidate's CV."
+    }
+  }
+}

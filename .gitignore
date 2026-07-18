@@ -10,6 +10,7 @@ data/*.txt
 !data/sample-cv.txt
 .env
 .netlify/
+.ginse/
 .agents/
 skills-lock.json
 

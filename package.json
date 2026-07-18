@@ -12,8 +12,10 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
+    "@netlify/blobs": "^10.7.9",
     "@netlify/functions": "5.1.0",
     "cheerio": "^1.1.2",
+    "jose": "^6.2.3",
     "openai": "4.104.0",
     "pdf-parse": "2.4.5"
   },

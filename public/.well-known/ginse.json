@@ -1,0 +1,158 @@
+{
+  "schema_version": "2",
+  "slug": "goat-your-job-railover",
+  "display_name": "GOAT your Job — RAILOVER",
+  "description": "Turn CV text into ranked, tailored application packs for recently funded companies.",
+  "presentation": {
+    "action": "Match funded companies",
+    "input": {
+      "label": "CV text",
+      "icon": "document"
+    },
+    "output": {
+      "label": "Application packs",
+      "icon": "archive"
+    }
+  },
+  "price": {
+    "amount_cents": 500,
+    "currency": "EUR"
+  },
+  "run_url": "https://ismamariaaxelteam.netlify.app/run",
+  "input_schema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "required": [
+      "cvText"
+    ],
+    "properties": {
+      "cvText": {
+        "type": "string",
+        "minLength": 40,
+        "maxLength": 100000,
+        "description": "Plain text extracted from the candidate's CV."
+      }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "required": [
+      "sourceMode",
+      "profile",
+      "companies",
+      "warnings",
+      "geographicZone",
+      "cvFileName"
+    ],
+    "properties": {
+      "sourceMode": {
+        "type": "string",
+        "enum": [
+          "live",
+          "cache"
+        ]
+      },
+      "profile": {
+        "type": "object",
+        "required": [
+          "skills",
+          "jobTitles",
+          "targetRoles",
+          "experiences",
+          "extractionMethod"
+        ],
+        "properties": {
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "jobTitles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "targetRoles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "experiences": {
+            "type": "array"
+          },
+          "extractionMethod": {
+            "type": "string",
+            "enum": [
+              "heuristic",
+              "llm"
+            ]
+          }
+        }
+      },
+      "companies": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "name",
+            "score",
+            "scoreReason",
+            "matchedSkills",
+            "contact",
+            "application"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "score": {
+              "type": "number"
+            },
+            "scoreReason": {
+              "type": "string"
+            },
+            "matchedSkills": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "contact": {
+              "type": "object"
+            },
+            "application": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "warnings": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "geographicZone": {
+        "const": "Monde entier"
+      },
+      "cvFileName": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    }
+  },
+  "example": {
+    "input": {
+      "cvText": "Julien Martin — Full-stack developer. Skills: TypeScript, JavaScript, Node.js, React, PostgreSQL, Python and SQL. Built Node.js APIs and React product features for a B2B SaaS platform, then automated data dashboards with Python and SQL."
+    }
+  },
+  "ownership_token": "ginse_verify_b525e6fee55b4f12b0d18ee63316db34"
+}
