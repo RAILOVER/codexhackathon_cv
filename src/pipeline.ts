@@ -178,11 +178,11 @@ async function toDemoCompany(
 /** Runs the complete sourcing/matching/generation sequence used by the website. */
 export async function runApplicationPipeline({
   cvText,
-  motivationLetter,
+  motivationLetter = "",
   forceCache = false,
 }: {
   cvText: string;
-  motivationLetter: string;
+  motivationLetter?: string;
   forceCache?: boolean;
 }): Promise<PipelineResult> {
   const profile = extractCvProfileHeuristically(cvText);

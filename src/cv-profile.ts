@@ -35,7 +35,7 @@ const JOB_TITLE_PATTERN = /\b(?:développeur(?:\s+(?:full[ -]?stack|front[ -]?en
 
 const SKILL_HEADING_PATTERN = /^(?:compétences?|skills?|stack(?: technique)?|outils|technologies?)\s*:??$/i;
 const EXPERIENCE_HEADING_PATTERN = /^(?:expériences? (?:professionnelles?)?|parcours professionnel|professional experience)\s*:??$/i;
-const STOP_SECTION_PATTERN = /^(?:formation|éducation|education|certifications?|langues?|intérêts?|centres d'intérêt)\b/i;
+const STOP_SECTION_PATTERN = /^(?:expériences? (?:professionnelles?)?|parcours professionnel|professional experience|formation|éducation|education|certifications?|langues?|intérêts?|centres d'intérêt)\b/i;
 
 export const CV_EXTRACTION_SYSTEM_PROMPT = `Tu extrais un CV sans inventer aucune information.
 Réponds uniquement par un objet JSON valide conforme à ce schéma :

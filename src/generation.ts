@@ -58,7 +58,7 @@ function motivationStyle(letter: string): "direct" | "formel" {
 export function generateApplication(
   profile: CvProfile,
   funding: ScoredFunding,
-  motivationLetter: string,
+  motivationLetter = "",
 ): GeneratedApplication {
   const title = candidateTitle(profile);
   const skills = profile.skills.slice(0, 8);
@@ -119,7 +119,7 @@ export function generateApplication(
 export async function generateApplicationWithLlm(
   profile: CvProfile,
   funding: ScoredFunding,
-  motivationLetter: string,
+  motivationLetter = "",
 ): Promise<ApplicationGenerationResult> {
   const application = generateApplication(profile, funding, motivationLetter);
 
@@ -153,7 +153,7 @@ export async function generateApplicationWithLlm(
         },
         {
           role: "user",
-          content: `Réécris la lettre de motivation pour cette candidature spontanée. Préserve l’intention et le ton de la lettre source, mais ancre-la dans les faits ci-dessous.\n\nPROFIL CANDIDAT\n${truncate(candidateFacts, 4_500)}\n\nLETTRE SOURCE\n${truncate(motivationLetter, 3_500)}\n\nENTREPRISE\n${truncate(companyFacts, 3_500)}`,
+          content: `Rédige une lettre de motivation pour cette candidature spontanée. Il n’y a pas de lettre source : adopte un ton professionnel, direct et chaleureux, uniquement à partir des faits ci-dessous.\n\nPROFIL CANDIDAT\n${truncate(candidateFacts, 4_500)}\n\nENTREPRISE\n${truncate(companyFacts, 3_500)}`,
         },
       ],
     });

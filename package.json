@@ -14,6 +14,7 @@
     "extract:cv": "tsx src/run-extract-cv.ts",
     "score:matches": "tsx src/run-score-matches.ts",
     "export:role1": "tsx src/run-export-role1.ts",
+    "agent:run": "tsx src/run-agent.ts",
     "check": "tsc --noEmit",
     "dev": "tsx src/server.ts",
     "start": "tsx src/server.ts"

@@ -2,7 +2,7 @@
 
 ## Démo web
 
-L'application GOAT your Job accepte un CV **PDF ou TXT** (4 Mo maximum), une lettre de motivation et utilise la zone verrouillée **« Monde entier »** pour la démonstration. Un clic lance le pipeline : extraction du CV, recherche de levées récentes, enrichissement légal, recherche d'un contact public, scoring, puis génération d'un email, d'une lettre et d'un CV adaptés pour chaque entreprise.
+L’agent GOAT your Job accepte uniquement un CV **PDF ou TXT** (4 Mo maximum). La zone est automatiquement fixée à **« Monde entier »**. Une exécution lance l’extraction du CV, la recherche de levées récentes, l’enrichissement légal, la recherche d'un contact public, le scoring, puis la génération d'un email, d'une lettre et d'un CV adaptés pour chaque entreprise.
 
 ```bash
 pnpm install
@@ -13,13 +13,23 @@ Ouvrir ensuite [http://localhost:3000](http://localhost:3000). Les sources Maddy
 
 Les contenus adaptés sont générés de manière factuelle à partir du CV et des données entreprise, sans inventer de métriques. Les boutons permettent de copier un email public, d’ouvrir une page contact ou de télécharger le CV/la lettre en PDF.
 
+## Agent portable (sans interface)
+
+Le point d'entrée de l'agent est [`src/agent.ts`](src/agent.ts). Il ne demande qu'un CV : du texte déjà extrait (`cvText`) ou un fichier PDF/TXT encodé en base64 (`cvFile`). La zone est fixée par le code à `Monde entier` ; il n'existe ni champ lettre de motivation ni champ zone géographique.
+
+```bash
+pnpm agent:run data/agent-input.example.json
+```
+
+La sortie JSON contient `companies` (6 maximum) avec le score, le contact public (email sinon URL de contact), l'identité légale et `application` (email, lettre et CV adaptés). L'exemple active `forceCache: true` uniquement pour une démo hors ligne ; omettre ce champ pour lancer la collecte Maddyness en direct.
+
 ### Lettres améliorées par IA
 
-La fonction `analyze` utilise le SDK OpenAI côté serveur pour réécrire chaque lettre de motivation avec `gpt-4.1-mini`, à partir du CV structuré, de la lettre source et des faits vérifiés sur l’entreprise. Elle conserve un repli factuel si l’IA est indisponible.
+La fonction `analyze` utilise le SDK OpenAI côté serveur pour rédiger chaque lettre de motivation avec `gpt-4.1-mini`, à partir du CV structuré et des faits vérifiés sur l’entreprise. Elle conserve un repli factuel si l’IA est indisponible.
 
 Sur **Netlify**, activer **AI Gateway** dans le tableau de bord après le premier déploiement de production. Ne pas ajouter de clé `OPENAI_API_KEY` manuellement : Netlify injecte les identifiants temporaires nécessaires dans la fonction, sans les exposer au navigateur. En local ou sur un autre hébergeur, une clé `OPENAI_API_KEY` peut être définie uniquement dans l’environnement serveur.
 
-## Déploiement Netlify / app.Ginse.ai
+## Déploiement Netlify
 
 Le dépôt contient déjà la configuration de déploiement :
 
@@ -27,7 +37,7 @@ Le dépôt contient déjà la configuration de déploiement :
 - `netlify/functions/analyze.mts` : endpoint serverless `POST /api/analyze` ;
 - `netlify.toml` : publication, build TypeScript et cache embarqué.
 
-Dans Netlify ou app.Ginse.ai, connecter le dépôt GitHub puis utiliser ces paramètres :
+Dans Netlify, connecter le dépôt GitHub puis utiliser ces paramètres :
 
 | Paramètre | Valeur |
 | --- | --- |

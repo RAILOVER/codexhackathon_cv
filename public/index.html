@@ -63,7 +63,7 @@
       .application-header { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 27px; }
       .application-header h2 { margin: 0; font-size: clamp(1.65rem, 3vw, 2.2rem); letter-spacing: -.05em; }
       .application-header p { max-width: 44ch; margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.5; }
-      .form-grid { display: grid; grid-template-columns: 1.15fr .85fr .85fr auto; gap: 12px; align-items: end; }
+      .form-grid { display: grid; grid-template-columns: 1.15fr .85fr auto; gap: 12px; align-items: end; }
       label { display: block; margin-bottom: 8px; color: #5a456a; font-size: .72rem; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
       .upload { position: relative; display: flex; min-height: 53px; align-items: center; gap: 10px; padding: 10px 13px; border: 1.5px dashed #c8a9db; border-radius: 13px; cursor: pointer; background: #fdfaff; }
       .upload:hover { background: #f5ecfa; }
@@ -145,8 +145,7 @@
           <form id="application-form" novalidate>
             <div class="form-grid">
               <div><label for="cv">Put your CV</label><label class="upload" for="cv"><input id="cv" type="file" accept="application/pdf,text/plain,.pdf,.txt" required /><span class="file-mark">↑</span><span class="file-label"><strong id="file-name">Upload your CV</strong><span id="file-detail">PDF or TXT - max 4 MB</span></span></label></div>
-              <div><label for="motivation">Put your motivation letter</label><textarea id="motivation" placeholder="Paste your current letter or explain your goal" required></textarea></div>
-              <div><label for="location">Put your geographic area</label><input id="location" type="text" value="Monde entier" readonly required /></div>
+              <div><label>Search scope</label><div class="upload"><span class="file-mark">◎</span><span class="file-label"><strong>Monde entier</strong><span>Recent funding rounds</span></span></div></div>
               <button class="run-button" id="run-button" type="submit">Find my matches →</button>
             </div>
             <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
@@ -226,13 +225,13 @@
       }
       function toBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(',')[1]); reader.onerror = () => reject(new Error('Impossible de lire le fichier.')); reader.readAsDataURL(file); }); }
       form.addEventListener('submit', async event => {
-        event.preventDefault(); const file = fileInput.files[0]; const motivationLetter = document.querySelector('#motivation').value.trim(); const geographicZone = document.querySelector('#location').value;
+        event.preventDefault(); const file = fileInput.files[0];
         status.className = 'form-status';
-        if (!file || !motivationLetter) { status.textContent = 'Ajoutez votre CV et votre lettre de motivation.'; status.classList.add('error'); return; }
+        if (!file) { status.textContent = 'Ajoutez votre CV.'; status.classList.add('error'); return; }
         if (file.size > 4 * 1024 * 1024) { status.textContent = 'Votre CV doit faire 4 Mo maximum.'; status.classList.add('error'); return; }
         runButton.disabled = true; runButton.textContent = 'Scanning opportunities…'; status.textContent = 'Analyse du CV, recherche des levées récentes et préparation des candidatures…';
         try {
-          const response = await fetch('/api/analyze', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ fileName: file.name, mimeType: file.type, fileBase64: await toBase64(file), motivationLetter, geographicZone }) });
+          const response = await fetch('/api/analyze', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ fileName: file.name, mimeType: file.type, fileBase64: await toBase64(file) }) });
           const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Analyse impossible.'); renderResults(result); status.textContent = result.sourceMode === 'live' ? 'Analyse terminée avec les sources récentes.' : 'Analyse terminée avec le cache de démonstration.';
         } catch (error) { status.textContent = error.message || 'Analyse impossible.'; status.classList.add('error'); }
         finally { runButton.disabled = false; runButton.textContent = 'Find my matches →'; }

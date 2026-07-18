@@ -2,22 +2,18 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { readFile } from "node:fs/promises";
 import { extname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { extractTextFromPdf } from "./pdf-text.js";
-import { runApplicationPipeline } from "./pipeline.js";
+import { runCandidateSourcingAgent, type CandidateAgentInput } from "./agent.js";
 
 const PORT = Number.parseInt(process.env.PORT ?? "3000", 10);
 const PUBLIC_DIR = fileURLToPath(new URL("../public/", import.meta.url));
 // Netlify buffers JSON request bodies at 6 MB. Base64 adds about one third,
 // therefore a 4 MB source PDF is the reliable cross-environment ceiling.
-const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
-const MAX_REQUEST_BYTES = Math.ceil(MAX_UPLOAD_BYTES * 1.4) + 20_000;
+const MAX_REQUEST_BYTES = Math.ceil(4 * 1024 * 1024 * 1.4) + 20_000;
 
 type AnalyzeRequest = {
   fileName?: unknown;
   mimeType?: unknown;
   fileBase64?: unknown;
-  motivationLetter?: unknown;
-  geographicZone?: unknown;
   forceCache?: unknown;
 };
 
@@ -57,44 +53,14 @@ async function readJson(request: IncomingMessage): Promise<AnalyzeRequest> {
   }
 }
 
-async function extractCvText(input: AnalyzeRequest): Promise<string> {
-  const fileName = text(input.fileName);
-  const mimeType = text(input.mimeType);
-  const fileBase64 = text(input.fileBase64);
-  if (!fileName || !fileBase64) throw new Error("Ajoutez un CV PDF ou TXT.");
-
-  const buffer = Buffer.from(fileBase64, "base64");
-  if (buffer.length === 0 || buffer.length > MAX_UPLOAD_BYTES) {
-    throw new Error("Le CV doit faire au maximum 4 Mo.");
-  }
-
-  const isPdf = mimeType === "application/pdf" || /\.pdf$/i.test(fileName);
-  const isText = mimeType === "text/plain" || /\.txt$/i.test(fileName);
-  if (isPdf) return extractTextFromPdf(buffer);
-  if (isText) return buffer.toString("utf8").trim();
-  throw new Error("Format de CV non pris en charge : utilisez un PDF ou un fichier TXT.");
-}
-
 async function handleAnalyze(request: IncomingMessage, response: ServerResponse): Promise<void> {
   try {
     const input = await readJson(request);
-    const motivationLetter = text(input.motivationLetter);
-    const geographicZone = text(input.geographicZone);
-    if (!motivationLetter) throw new Error("Ajoutez votre lettre de motivation ou vos éléments de motivation.");
-    if (geographicZone !== "Monde entier") {
-      throw new Error("La démo est volontairement limitée à la zone « Monde entier ».");
-    }
-
-    const cvText = await extractCvText(input);
-    if (cvText.length < 40) throw new Error("Le CV ne contient pas assez de texte pour lancer une analyse fiable.");
-
-    const result = await runApplicationPipeline({
-      cvText,
-      motivationLetter,
+    const result = await runCandidateSourcingAgent({
+      cvFile: { fileName: text(input.fileName), mimeType: text(input.mimeType), base64: text(input.fileBase64) },
       forceCache: input.forceCache === true,
-    });
-
-    sendJson(response, 200, { ...result, geographicZone, cvFileName: text(input.fileName) });
+    } satisfies CandidateAgentInput);
+    sendJson(response, 200, result);
   } catch (error) {
     sendJson(response, 400, { error: error instanceof Error ? error.message : "Analyse impossible." });
   }
