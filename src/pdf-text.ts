@@ -1,5 +1,3 @@
-import { PDFParse } from "pdf-parse";
-
 const MIN_EXTRACTED_CHARACTERS = 40;
 
 /**
@@ -25,6 +23,10 @@ function preservePdfLines(value: string): string {
  * the matching and generated applications unreliable.
  */
 export async function extractTextFromPdf(pdf: Buffer): Promise<string> {
+  // `pdf-parse` loads PDF.js, which expects DOM globals unavailable in a
+  // Netlify function. Loading it only for real PDF inputs keeps text-only
+  // Ginse runs and the authorization gate available at cold start.
+  const { PDFParse } = await import("pdf-parse");
   const parser = new PDFParse({ data: new Uint8Array(pdf) });
 
   try {
