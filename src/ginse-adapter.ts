@@ -15,7 +15,11 @@ const ginseInvocationKey = importJWK({
   alg: "EdDSA",
   use: "sig",
 });
-const store = getStore({ name: "ginse-goat-your-job-operations", consistency: "strong" });
+function operationStore() {
+  // Netlify attaches the Blobs environment during function invocation, so the
+  // shared store must be created after the request has entered the handler.
+  return getStore({ name: "ginse-goat-your-job-operations", consistency: "strong" });
+}
 
 export type GinseInput = { cvText: string };
 
@@ -133,6 +137,7 @@ export async function runGinseOperation(request: Request): Promise<Response> {
     const input = parseInput(await request.json());
     const providerOperationId = operationId(idempotencyKey);
     const key = operationStoreKey(providerOperationId);
+    const store = operationStore();
     const claimed: StoredOperation = { fingerprint: fingerprint(input), providerOperationId, status: "pending" };
     const claim = await store.setJSON(key, claimed, { onlyIfNew: true });
 
@@ -181,6 +186,7 @@ export async function getGinseOperation(request: Request, providerOperationId: s
 
   try {
     if (!/^goat_[a-f0-9]{64}$/.test(providerOperationId)) return response({ error: "Unknown operation." }, 404);
+    const store = operationStore();
     const saved = await store.get(operationStoreKey(providerOperationId), { type: "json", consistency: "strong" }) as StoredOperation | null;
     if (!saved) return response({ error: "Unknown operation." }, 404);
     if (saved.status === "succeeded" && saved.output) {
