@@ -1,10 +1,20 @@
 import { getStore } from "@netlify/blobs";
 import { createHash, randomUUID } from "node:crypto";
-import { compactVerify, createRemoteJWKSet } from "jose";
+import { compactVerify, createRemoteJWKSet, importJWK } from "jose";
 import { runCandidateSourcingAgent, type CandidateAgentOutput } from "./agent.js";
 
 const MAX_CV_TEXT_LENGTH = 100_000;
 const jwks = createRemoteJWKSet(new URL("https://api.ginse.ai/.well-known/jwks.json"));
+// Published Ginse invocation key. The remote JWKS remains primary so key
+// rotation works; this fallback keeps verification available in a cold
+// function even if a one-off JWKS fetch is unavailable.
+const ginseInvocationKey = importJWK({
+  kty: "OKP",
+  crv: "Ed25519",
+  x: "QHjetzvxsSaceb-Ud_TRd7je-TQYsjYG45jRUEJyw9Y",
+  alg: "EdDSA",
+  use: "sig",
+});
 const store = getStore({ name: "ginse-goat-your-job-operations", consistency: "strong" });
 
 export type GinseInput = { cvText: string };
@@ -31,7 +41,11 @@ export async function requireGinseBearer(request: Request): Promise<void> {
 
   // Ginse issues a compact Ed25519 JWS. Signature validity is the required
   // trust boundary; it is deliberately not assumed to have JWT claims.
-  await compactVerify(match[1], jwks, { algorithms: ["EdDSA"] });
+  try {
+    await compactVerify(match[1], jwks, { algorithms: ["EdDSA"] });
+  } catch {
+    await compactVerify(match[1], await ginseInvocationKey, { algorithms: ["EdDSA"] });
+  }
 }
 
 export function parseInput(value: unknown): GinseInput {
