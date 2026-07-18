@@ -1,3 +1,4 @@
+import OpenAI from "openai";
 import type { CvProfile, ScoredFunding } from "./types.js";
 
 export type GeneratedApplication = {
@@ -10,6 +11,18 @@ export type GeneratedApplication = {
     experiences: Array<{ title: string; summary: string; skills: string[] }>;
   };
 };
+
+export type ApplicationGenerationResult = {
+  application: GeneratedApplication;
+  usedLlm: boolean;
+  warning?: string;
+};
+
+const LLM_MODEL = "gpt-4.1-mini";
+
+function truncate(value: string, maximum: number): string {
+  return value.length <= maximum ? value : `${value.slice(0, maximum).trimEnd()}…`;
+}
 
 function sentence(value: string): string {
   const compact = value.replace(/\s+/g, " ").trim();
@@ -95,4 +108,67 @@ export function generateApplication(
       experiences: profile.experiences.slice(0, 4),
     },
   };
+}
+
+/**
+ * Improves only the cover letter through the OpenAI SDK. On Netlify, the bare
+ * SDK instance automatically uses AI Gateway credentials; locally, a standard
+ * OPENAI_API_KEY works too. The fallback keeps the demo usable if AI is not
+ * enabled yet or if the gateway has no remaining credits.
+ */
+export async function generateApplicationWithLlm(
+  profile: CvProfile,
+  funding: ScoredFunding,
+  motivationLetter: string,
+): Promise<ApplicationGenerationResult> {
+  const application = generateApplication(profile, funding, motivationLetter);
+
+  if (!process.env.OPENAI_API_KEY) {
+    return { application, usedLlm: false };
+  }
+
+  const candidateFacts = [
+    `Intitulé visé : ${candidateTitle(profile)}`,
+    `Compétences extraites : ${profile.skills.slice(0, 10).join(", ") || "non précisées"}`,
+    `Expériences : ${profile.experiences.slice(0, 3).map((experience) => `${experience.title} — ${experience.summary}`).join(" | ") || "non précisées"}`,
+  ].join("\n");
+  const companyFacts = [
+    `Entreprise : ${funding.companyName}`,
+    `Description officielle : ${funding.description}`,
+    `Date de levée si disponible : ${funding.fundingDate ?? "non communiquée"}`,
+    `Dirigeant légal si disponible : ${funding.legal?.legalRepresentative?.fullName ?? "non identifié"}`,
+    `Justification de correspondance : ${funding.justification}`,
+  ].join("\n");
+
+  try {
+    const openai = new OpenAI();
+    const completion = await openai.chat.completions.create({
+      model: LLM_MODEL,
+      temperature: 0.35,
+      max_tokens: 650,
+      messages: [
+        {
+          role: "system",
+          content: "Tu rédiges des lettres de motivation en français. Réponds uniquement par la lettre, sans titre, sans Markdown et sans commentaire. Ne fabrique aucune expérience, compétence, métrique, poste ouvert, montant de levée, nom de contact ni information d’entreprise. Reste entre 250 et 350 mots, avec un ton professionnel, concret et personnalisé.",
+        },
+        {
+          role: "user",
+          content: `Réécris la lettre de motivation pour cette candidature spontanée. Préserve l’intention et le ton de la lettre source, mais ancre-la dans les faits ci-dessous.\n\nPROFIL CANDIDAT\n${truncate(candidateFacts, 4_500)}\n\nLETTRE SOURCE\n${truncate(motivationLetter, 3_500)}\n\nENTREPRISE\n${truncate(companyFacts, 3_500)}`,
+        },
+      ],
+    });
+    const coverLetter = completion.choices[0]?.message.content?.trim();
+
+    if (!coverLetter || coverLetter.length < 120) {
+      return { application, usedLlm: false, warning: `La lettre IA de ${funding.companyName} était vide : version factuelle utilisée.` };
+    }
+
+    return { application: { ...application, coverLetter }, usedLlm: true };
+  } catch (error) {
+    return {
+      application,
+      usedLlm: false,
+      warning: `IA indisponible pour ${funding.companyName} : version factuelle utilisée.`,
+    };
+  }
 }

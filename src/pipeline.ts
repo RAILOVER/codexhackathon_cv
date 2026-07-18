@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { extractCvProfileHeuristically } from "./cv-profile.js";
 import { findPublicContact } from "./contact-finder.js";
-import { generateApplication, type GeneratedApplication } from "./generation.js";
+import { generateApplicationWithLlm, type GeneratedApplication } from "./generation.js";
 import { scrapeRecentFundings } from "./maddyness.js";
 import { enrichFundingsWithLegalData } from "./recherche-entreprises.js";
 import { rankFundingsForProfile } from "./scoring.js";
@@ -46,6 +46,7 @@ export type DemoCompany = {
   score: number;
   scoreReason: string;
   matchedSkills: string[];
+  generationMode: "ai" | "fallback";
   application: GeneratedApplication;
 };
 
@@ -140,28 +141,37 @@ async function loadLiveFundings(profile: CvProfile): Promise<{ fundings: Contact
   return { fundings: withContacts, warnings: [...scraped.warnings, ...legal.warnings] };
 }
 
-function toDemoCompany(funding: ScoredFunding, profile: CvProfile, motivationLetter: string): DemoCompany {
+async function toDemoCompany(
+  funding: ScoredFunding,
+  profile: CvProfile,
+  motivationLetter: string,
+): Promise<{ company: DemoCompany; warning?: string }> {
   const email = funding.contact.email;
   const contactPage = funding.contact.contactPageUrl;
+  const generated = await generateApplicationWithLlm(profile, funding, motivationLetter);
 
   return {
-    name: funding.companyName,
-    description: funding.description,
-    fundingDate: funding.fundingDate,
-    articleUrl: funding.articleUrl,
-    websiteUrl: funding.websiteUrl,
-    legalRepresentative: funding.legal?.legalRepresentative?.fullName ?? null,
-    legalForm: funding.legal?.legalForm ?? funding.legal?.legalFormCode ?? null,
-    siren: funding.legal?.siren ?? null,
-    contact: email
-      ? { type: "email", value: email }
-      : contactPage
-        ? { type: "url", value: contactPage }
-        : { type: "unavailable", value: null },
-    score: funding.score,
-    scoreReason: funding.justification,
-    matchedSkills: funding.matchedSkills,
-    application: generateApplication(profile, funding, motivationLetter),
+    company: {
+      name: funding.companyName,
+      description: funding.description,
+      fundingDate: funding.fundingDate,
+      articleUrl: funding.articleUrl,
+      websiteUrl: funding.websiteUrl,
+      legalRepresentative: funding.legal?.legalRepresentative?.fullName ?? null,
+      legalForm: funding.legal?.legalForm ?? funding.legal?.legalFormCode ?? null,
+      siren: funding.legal?.siren ?? null,
+      contact: email
+        ? { type: "email", value: email }
+        : contactPage
+          ? { type: "url", value: contactPage }
+          : { type: "unavailable", value: null },
+      score: funding.score,
+      scoreReason: funding.justification,
+      matchedSkills: funding.matchedSkills,
+      generationMode: generated.usedLlm ? "ai" : "fallback",
+      application: generated.application,
+    },
+    warning: generated.warning,
   };
 }
 
@@ -201,10 +211,15 @@ export async function runApplicationPipeline({
     warnings.push("Peu d’informations ont été extraites du CV : vérifiez que le PDF contient du texte sélectionnable.");
   }
 
+  const generatedCompanies = await Promise.all(
+    ranked.fundings.map((funding) => toDemoCompany(funding, profile, motivationLetter)),
+  );
+  warnings.push(...generatedCompanies.flatMap((result) => result.warning ? [result.warning] : []));
+
   return {
     sourceMode,
     profile,
-    companies: ranked.fundings.map((funding) => toDemoCompany(funding, profile, motivationLetter)),
+    companies: generatedCompanies.map((result) => result.company),
     warnings,
   };
 }

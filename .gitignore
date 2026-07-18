@@ -9,3 +9,6 @@ data/matched-companies.json
 data/*.txt
 !data/sample-cv.txt
 .env
+.netlify/
+.agents/
+skills-lock.json

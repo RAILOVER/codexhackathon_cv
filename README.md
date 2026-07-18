@@ -13,6 +13,12 @@ Ouvrir ensuite [http://localhost:3000](http://localhost:3000). Les sources Maddy
 
 Les contenus adaptés sont générés de manière factuelle à partir du CV et des données entreprise, sans inventer de métriques. Les boutons permettent de copier un email public, d’ouvrir une page contact ou de télécharger le CV/la lettre en PDF.
 
+### Lettres améliorées par IA
+
+La fonction `analyze` utilise le SDK OpenAI côté serveur pour réécrire chaque lettre de motivation avec `gpt-4.1-mini`, à partir du CV structuré, de la lettre source et des faits vérifiés sur l’entreprise. Elle conserve un repli factuel si l’IA est indisponible.
+
+Sur **Netlify**, activer **AI Gateway** dans le tableau de bord après le premier déploiement de production. Ne pas ajouter de clé `OPENAI_API_KEY` manuellement : Netlify injecte les identifiants temporaires nécessaires dans la fonction, sans les exposer au navigateur. En local ou sur un autre hébergeur, une clé `OPENAI_API_KEY` peut être définie uniquement dans l’environnement serveur.
+
 ## Déploiement Netlify / app.Ginse.ai
 
 Le dépôt contient déjà la configuration de déploiement :
