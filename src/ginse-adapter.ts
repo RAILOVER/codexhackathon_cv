@@ -133,11 +133,11 @@ function operationId(): string {
 }
 
 function operationStoreKey(providerOperationId: string): string {
-  return `operations-v5/${providerOperationId}`;
+  return `operations-v6/${providerOperationId}`;
 }
 
 function idempotencyStoreKey(idempotencyKey: string): string {
-  return `idempotency-v5/${createHash("sha256").update(idempotencyKey).digest("hex")}`;
+  return `idempotency-v6/${createHash("sha256").update(idempotencyKey).digest("hex")}`;
 }
 
 function statusUrl(request: Request, providerOperationId: string): string {
@@ -170,7 +170,7 @@ export async function runGinseOperation(request: Request): Promise<Response> {
   try {
     const body = await request.json();
     const idempotencyKey = providerIdempotencyKey(request, body);
-    if (!/^[A-Za-z0-9._-]{8,200}$/.test(idempotencyKey)) {
+    if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{7,199}$/.test(idempotencyKey)) {
       return response({ error: "A valid Idempotency-Key is required." }, 400);
     }
 
@@ -214,7 +214,8 @@ export async function runGinseOperation(request: Request): Promise<Response> {
       // every invocation completes within the marketplace verification window.
       const output = validateOutput(await runCandidateSourcingAgent({ cvText: input.cvText, forceCache: true }));
       const completed: StoredOperation = { ...claimed, status: "succeeded", output };
-      await store.setJSON(key, completed, { onlyIfMatch: claim.etag });
+      const write = await store.setJSON(key, completed, { onlyIfMatch: claim.etag });
+      if (!write.modified) throw new Error("Could not persist the completed operation.");
       return response({ status: "succeeded", provider_operation_id: providerOperationId, replayed: false, output });
     } catch (error) {
       const failed: StoredOperation = {
