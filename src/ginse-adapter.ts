@@ -131,6 +131,20 @@ function statusUrl(request: Request, providerOperationId: string): string {
   return `${url.origin}/run/status/${providerOperationId}`;
 }
 
+async function waitForTerminalOperation(key: string, initial: StoredOperation): Promise<StoredOperation> {
+  let current = initial;
+  // This action is synchronous. A duplicate that reaches another Netlify
+  // replica while the first call is finishing waits for that durable result
+  // instead of starting a second run or returning a different payload.
+  for (let attempt = 0; current.status === "pending" && attempt < 80; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    const next = await operationStore().get(key, { type: "json", consistency: "strong" }) as StoredOperation | null;
+    if (!next) break;
+    current = next;
+  }
+  return current;
+}
+
 export async function runGinseOperation(request: Request): Promise<Response> {
   if (request.method !== "POST") return response({ error: "Use POST." }, 405);
   try {
@@ -153,7 +167,8 @@ export async function runGinseOperation(request: Request): Promise<Response> {
     const claim = await store.setJSON(key, claimed, { onlyIfNew: true });
 
     if (!claim.modified) {
-      const saved = await store.get(key, { type: "json", consistency: "strong" }) as StoredOperation | null;
+      const found = await store.get(key, { type: "json", consistency: "strong" }) as StoredOperation | null;
+      const saved = found ? await waitForTerminalOperation(key, found) : null;
       if (!saved || saved.fingerprint !== claimed.fingerprint) {
         return response({ error: "Idempotency-Key was already used with a different request." }, 409);
       }
