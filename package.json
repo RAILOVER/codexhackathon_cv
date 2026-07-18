@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "scrape:fundings": "tsx src/run-scrape.ts",
     "enrich:legal": "tsx src/run-enrich-legal.ts",
@@ -10,10 +14,14 @@
     "extract:cv": "tsx src/run-extract-cv.ts",
     "score:matches": "tsx src/run-score-matches.ts",
     "export:role1": "tsx src/run-export-role1.ts",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "dev": "tsx src/server.ts",
+    "start": "tsx src/server.ts"
   },
   "dependencies": {
-    "cheerio": "^1.1.2"
+    "@netlify/functions": "5.1.0",
+    "cheerio": "^1.1.2",
+    "pdf-parse": "2.4.5"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

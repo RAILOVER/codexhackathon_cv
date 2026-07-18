@@ -150,20 +150,23 @@ export async function scrapeRecentFundings({
     }
   }
 
-  const fundings: Funding[] = [];
-  for (const candidate of candidates.slice(0, maxFundings)) {
-    try {
-      const company = await scrapeCompanyProfile(candidate.companyName, candidate.companyProfileUrl);
-      fundings.push({ ...candidate, ...company });
-    } catch (error) {
-      warnings.push(`Impossible d'enrichir ${candidate.companyName}: ${String(error)}`);
-      fundings.push({
-        ...candidate,
-        description: `Description indisponible pour ${candidate.companyName}.`,
-        websiteUrl: null,
-      });
-    }
-  }
+  // Profiles are independent. Fetching this small, bounded batch together
+  // keeps the website responsive while preserving the original candidate order.
+  const fundings = await Promise.all(
+    candidates.slice(0, maxFundings).map(async (candidate) => {
+      try {
+        const company = await scrapeCompanyProfile(candidate.companyName, candidate.companyProfileUrl);
+        return { ...candidate, ...company };
+      } catch (error) {
+        warnings.push(`Impossible d'enrichir ${candidate.companyName}: ${String(error)}`);
+        return {
+          ...candidate,
+          description: `Description indisponible pour ${candidate.companyName}.`,
+          websiteUrl: null,
+        };
+      }
+    }),
+  );
 
   return { fundings, sourceUrl: MADDYNESS_FUNDINGS_URL, recapUrls, warnings };
 }

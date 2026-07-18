@@ -1,4 +1,36 @@
-# Agent de candidature spontanée
+# GOAT your Job — agent de candidature spontanée
+
+## Démo web
+
+L'application GOAT your Job accepte un CV **PDF ou TXT** (4 Mo maximum), une lettre de motivation et utilise la zone verrouillée **« Monde entier »** pour la démonstration. Un clic lance le pipeline : extraction du CV, recherche de levées récentes, enrichissement légal, recherche d'un contact public, scoring, puis génération d'un email, d'une lettre et d'un CV adaptés pour chaque entreprise.
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Ouvrir ensuite [http://localhost:3000](http://localhost:3000). Les sources Maddyness et Recherche Entreprises sont utilisées lorsque le réseau est disponible ; sinon le site charge automatiquement six entreprises réelles sauvegardées dans `data/role1-results.json`.
+
+Les contenus adaptés sont générés de manière factuelle à partir du CV et des données entreprise, sans inventer de métriques. Les boutons permettent de copier un email public, d’ouvrir une page contact ou de télécharger le CV/la lettre en PDF.
+
+## Déploiement Netlify / app.Ginse.ai
+
+Le dépôt contient déjà la configuration de déploiement :
+
+- `public/` : site statique GOAT your Job ;
+- `netlify/functions/analyze.mts` : endpoint serverless `POST /api/analyze` ;
+- `netlify.toml` : publication, build TypeScript et cache embarqué.
+
+Dans Netlify ou app.Ginse.ai, connecter le dépôt GitHub puis utiliser ces paramètres :
+
+| Paramètre | Valeur |
+| --- | --- |
+| Build command | `pnpm check` |
+| Publish directory | `public` |
+| Functions directory | `netlify/functions` |
+| Node | `24` |
+
+Ne stocker aucune clé API dans le dépôt. La démo actuelle ne dépend d’aucune clé : elle bascule sur le cache si une source externe est indisponible.
 
 ## Étape 1 - Sourcing des levées de fonds
 

@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GOAT your Job</title>
+    <style>
+      :root {
+        --ink: #2f2440;
+        --muted: #71667d;
+        --lavender: #bd7ee1;
+        --lavender-deep: #71468d;
+        --mint: #a7db91;
+        --mint-pale: #eaf7e5;
+        --gold: #d7b363;
+        --blue: #405d91;
+        --blue-dark: #293d64;
+        --paper: #fbf9ff;
+        --line: #e9e0f0;
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        min-width: 320px;
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 85% 3%, #e9d7f7 0, transparent 27rem),
+          radial-gradient(circle at 6% 84%, #dff3da 0, transparent 26rem),
+          var(--paper);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .shell { width: min(1160px, calc(100% - 40px)); margin: 0 auto; }
+      nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+      .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 900; letter-spacing: -.04em; text-decoration: none; }
+      .brand img { width: 39px; height: 39px; border: 2px solid var(--lavender-deep); border-radius: 14px; object-fit: cover; object-position: 50% 30%; background: var(--lavender); }
+      .brand span { font-size: 1.22rem; }
+      .brand small { display: block; margin-top: 1px; color: var(--muted); font-size: .55rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+      .nav-links { display: flex; gap: 25px; align-items: center; }
+      .nav-links a { color: var(--muted); font-size: .88rem; font-weight: 700; text-decoration: none; }
+      .nav-links a:hover { color: var(--lavender-deep); }
+      .nav-cta { padding: 10px 15px; border: 1px solid #d8c6e6; border-radius: 999px; color: var(--lavender-deep) !important; background: rgba(255, 255, 255, .7); }
+
+      main { padding: 48px 0 80px; }
+      .hero { display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: clamp(35px, 6vw, 84px); min-height: 460px; }
+      .eyebrow { display: inline-flex; align-items: center; gap: 7px; margin: 0 0 18px; color: var(--lavender-deep); font-size: .7rem; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+      .eyebrow::before { width: 9px; height: 9px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 5px var(--mint-pale); content: ""; }
+      h1 { max-width: 10ch; margin: 0; font-size: clamp(3.1rem, 7vw, 5.6rem); letter-spacing: -.07em; line-height: .91; }
+      h1 em { color: var(--lavender-deep); font-style: normal; }
+      .hero-copy { max-width: 36ch; margin: 19px 0 0; color: var(--muted); font-size: 1.02rem; line-height: 1.55; }
+
+      .mascot-stage { position: relative; display: grid; min-height: 470px; place-items: center; isolation: isolate; }
+      .mascot-stage::before { position: absolute; z-index: -2; width: min(31rem, 100%); aspect-ratio: 1; border-radius: 44% 56% 48% 52% / 43% 42% 58% 57%; background: linear-gradient(145deg, #c58ae5, #9e6bc6); content: ""; transform: rotate(-8deg); }
+      .mascot-stage::after { position: absolute; z-index: -1; right: 2%; bottom: 8%; width: 62%; height: 28%; border-radius: 50%; background: rgba(58, 38, 76, .18); filter: blur(18px); content: ""; }
+      .mascot { width: min(360px, 90%); margin-top: 26px; filter: drop-shadow(0 20px 17px rgba(39, 25, 57, .22)); animation: float 5.5s ease-in-out infinite; }
+      .insight { position: absolute; right: -2%; top: 12%; padding: 13px 15px; border: 1px solid rgba(255,255,255,.7); border-radius: 16px; color: var(--blue-dark); background: rgba(255,255,255,.86); box-shadow: 0 15px 35px rgba(62,39,83,.14); font-size: .77rem; font-weight: 800; }
+      .insight strong { display: block; margin-top: 3px; color: var(--lavender-deep); font-size: 1.55rem; letter-spacing: -.06em; }
+      .signal { position: absolute; left: -2%; bottom: 15%; padding: 11px 14px; border-radius: 14px; color: #42653b; background: var(--mint); box-shadow: 0 12px 28px rgba(59,97,48,.18); font-size: .75rem; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; }
+
+      .application { margin-top: 52px; padding: clamp(22px, 5vw, 42px); border: 1px solid rgba(113,70,141,.17); border-radius: 29px; background: rgba(255,255,255,.78); box-shadow: 0 27px 65px rgba(65,43,85,.10); backdrop-filter: blur(14px); }
+      .application-header { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 27px; }
+      .application-header h2 { margin: 0; font-size: clamp(1.65rem, 3vw, 2.2rem); letter-spacing: -.05em; }
+      .application-header p { max-width: 44ch; margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.5; }
+      .form-grid { display: grid; grid-template-columns: 1.15fr .85fr .85fr auto; gap: 12px; align-items: end; }
+      label { display: block; margin-bottom: 8px; color: #5a456a; font-size: .72rem; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+      .upload { position: relative; display: flex; min-height: 53px; align-items: center; gap: 10px; padding: 10px 13px; border: 1.5px dashed #c8a9db; border-radius: 13px; cursor: pointer; background: #fdfaff; }
+      .upload:hover { background: #f5ecfa; }
+      .upload input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }
+      .file-mark { display: grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; border-radius: 9px; color: var(--lavender-deep); background: #ead7f4; font-weight: 900; }
+      .file-label strong, .file-label span { display: block; overflow: hidden; max-width: 165px; text-overflow: ellipsis; white-space: nowrap; }
+      .file-label strong { color: #4c385c; font-size: .78rem; }
+      .file-label span { margin-top: 2px; color: var(--muted); font-size: .67rem; }
+      input[type="text"], textarea { width: 100%; min-height: 53px; padding: 12px; border: 1px solid #e3d9e9; border-radius: 13px; outline: none; color: var(--ink); background: white; font: inherit; font-size: .86rem; resize: vertical; }
+      textarea { min-height: 53px; }
+      input:focus, textarea:focus, .upload:focus-within { border-color: var(--lavender); box-shadow: 0 0 0 4px #f1e6f8; }
+      button { font: inherit; }
+      .run-button { min-height: 53px; padding: 0 19px; border: 0; border-radius: 13px; cursor: pointer; color: #fff; background: var(--lavender-deep); box-shadow: 0 10px 20px rgba(109,68,138,.24); font-size: .85rem; font-weight: 850; white-space: nowrap; transition: transform .2s, background .2s; }
+      .run-button:hover { background: #56346f; transform: translateY(-2px); }
+      .run-button:disabled { opacity: .75; cursor: wait; transform: none; }
+      .form-status { min-height: 1.3em; margin: 13px 0 0; color: var(--muted); font-size: .82rem; }
+      .form-status.error { color: #a43d50; }
+
+      .trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 11px 34px; margin: 26px 0 0; color: #7b6d86; font-size: .69rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+      .trust span::before { margin-right: 8px; color: var(--mint); content: "✓"; }
+
+      #results-view { margin-top: 38px; }
+      .hidden { display: none; }
+      .results-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 19px; }
+      .results-head h2 { margin: 0; font-size: clamp(1.65rem, 4vw, 2.5rem); letter-spacing: -.06em; }
+      .result-total { padding: 12px 14px; border-radius: 13px; color: var(--blue-dark); background: #e5efff; font-size: .82rem; font-weight: 800; }
+      .company-list { display: grid; gap: 12px; }
+      .company-card { display: grid; grid-template-columns: 1.1fr 1.2fr auto; align-items: center; gap: 20px; padding: 20px; border: 1px solid #e8e0ef; border-radius: 18px; background: #fff; }
+      .company-card h3 { margin: 0; font-size: 1.03rem; letter-spacing: -.03em; }
+      .company-card p { margin: 5px 0 0; color: var(--muted); font-size: .78rem; }
+      .pill { display: inline-block; margin: 4px 4px 0 0; padding: 6px 8px; border-radius: 7px; color: var(--lavender-deep); background: #f2e7f8; font-size: .7rem; font-weight: 800; }
+      .score { color: var(--lavender-deep); font-size: 1.7rem; font-weight: 900; letter-spacing: -.07em; }
+      .score small { display: block; color: var(--muted); font-size: .62rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+      .pdf-button { display: block; width: 100%; min-height: 37px; margin-top: 8px; padding: 0 10px; border: 1px solid #d8c6e6; border-radius: 9px; cursor: pointer; color: var(--lavender-deep); background: #fff; font-size: .7rem; font-weight: 850; }
+      .pdf-button:hover { background: #f5ecfa; }
+      .company-card a { color: var(--lavender-deep); font-weight: 800; }
+      .company-meta { margin-top: 10px; color: var(--muted); font-size: .73rem; line-height: 1.45; }
+      .contact-link { display: inline-block; margin-top: 10px; font-size: .75rem; }
+      details { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 14px; }
+      summary { cursor: pointer; color: var(--blue-dark); font-size: .78rem; font-weight: 850; }
+      .document-preview { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 13px; }
+      .document-preview article { padding: 13px; border-radius: 12px; background: #fbf8fd; }
+      .document-preview h4 { margin: 0 0 8px; font-size: .8rem; }
+      .document-preview pre { margin: 0; color: #5a4b65; font: inherit; font-size: .74rem; line-height: 1.48; white-space: pre-wrap; }
+      .warning { margin-top: 10px; color: #7a5a16; font-size: .75rem; }
+
+      footer { padding: 26px 0 37px; color: #83768d; font-size: .76rem; text-align: center; }
+      @keyframes float { 50% { transform: translateY(-12px) rotate(1deg); } }
+      @media (max-width: 800px) { .hero { grid-template-columns: 1fr; text-align: center; } h1 { margin-inline: auto; } .hero-copy { margin-inline: auto; } .mascot-stage { min-height: 350px; grid-row: 1; } .mascot { width: 260px; } .form-grid { grid-template-columns: 1fr 1fr; } .run-button { grid-column: 1 / -1; } }
+      @media (max-width: 570px) { .shell { width: min(100% - 28px, 1160px); } .nav-links a:not(.nav-cta) { display: none; } main { padding-top: 23px; } .mascot-stage { min-height: 305px; } .insight { right: 0; } .signal { left: 0; } .application-header, .results-head { align-items: start; flex-direction: column; } .form-grid, .company-card { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <nav>
+        <a class="brand" href="#top" aria-label="GOAT your Job home"><img src="assets/goat-mascot.png" alt="GOAT your Job mascot" /><span>GOAT your Job<small>Your career agent</small></span></a>
+        <div class="nav-links"><a class="nav-cta" href="#launch">Get started</a></div>
+      </nav>
+
+      <main id="top">
+        <section class="hero">
+          <div>
+            <p class="eyebrow">Your career agent</p>
+            <h1>Find your next <em>job.</em></h1>
+            <p class="hero-copy">Three details in. Your best opportunities out.</p>
+          </div>
+          <div class="mascot-stage" aria-label="GOAT.ai mascot scanning opportunities">
+            <div class="insight">YOUR JOB HUNT<strong>ON</strong></div>
+            <img class="mascot" src="assets/goat-mascot.png" alt="GOAT your Job career assistant" />
+            <div class="signal">Ready to match</div>
+          </div>
+        </section>
+
+        <section id="launch" class="application" aria-labelledby="launch-title">
+          <div class="application-header">
+            <div><p class="eyebrow">Start here</p><h2 id="launch-title">Tell GOAT about you.</h2></div>
+            <p>That is all we need to get started.</p>
+          </div>
+          <form id="application-form" novalidate>
+            <div class="form-grid">
+              <div><label for="cv">Put your CV</label><label class="upload" for="cv"><input id="cv" type="file" accept="application/pdf,text/plain,.pdf,.txt" required /><span class="file-mark">↑</span><span class="file-label"><strong id="file-name">Upload your CV</strong><span id="file-detail">PDF or TXT - max 4 MB</span></span></label></div>
+              <div><label for="motivation">Put your motivation letter</label><textarea id="motivation" placeholder="Paste your current letter or explain your goal" required></textarea></div>
+              <div><label for="location">Put your geographic area</label><input id="location" type="text" value="Monde entier" readonly required /></div>
+              <button class="run-button" id="run-button" type="submit">Find my matches →</button>
+            </div>
+            <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section id="results-view" class="hidden" aria-live="polite">
+          <div class="results-head"><div><p class="eyebrow">Your priority matches</p><h2 id="result-title">3 tailored applications ready.</h2></div><div id="result-total" class="result-total">Prepared in 2 min 14 sec</div></div>
+          <div id="company-list" class="company-list"></div>
+        </section>
+      </main>
+      <footer>© 2026 GOAT your Job.</footer>
+    </div>
+
+    <script>
+      const form = document.querySelector('#application-form');
+      const fileInput = document.querySelector('#cv');
+      const fileName = document.querySelector('#file-name');
+      const fileDetail = document.querySelector('#file-detail');
+      const status = document.querySelector('#form-status');
+      const runButton = document.querySelector('#run-button');
+      const resultsView = document.querySelector('#results-view');
+      const resultTitle = document.querySelector('#result-title');
+      const resultTotal = document.querySelector('#result-total');
+      const companyList = document.querySelector('#company-list');
+
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        fileName.textContent = file.name;
+        fileDetail.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB · ready to analyse`;
+      });
+
+      const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
+      const formatDate = value => value ? new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' }).format(new Date(`${value}T12:00:00Z`)) : 'date non communiquée';
+      const pdfSafe = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[()\\]/g, '\\$&').replace(/[^\x20-\x7E]/g, '');
+      const wrap = text => String(text).split(/\n+/).flatMap(paragraph => {
+        const words = paragraph.split(/\s+/).filter(Boolean); const lines = []; let line = '';
+        words.forEach(word => { const candidate = `${line} ${word}`.trim(); if (candidate.length > 84 && line) { lines.push(line); line = word; } else line = candidate; });
+        if (line) lines.push(line); return lines.length ? lines : [''];
+      });
+      function makePdf(title, lines) {
+        const content = ['BT', '/F1 16 Tf', '60 750 Td', `(${pdfSafe(title)}) Tj`, '/F1 10 Tf', '0 -28 Td', ...lines.slice(0, 38).flatMap(line => [`(${pdfSafe(line)}) Tj`, '0 -16 Td']), 'ET'].join('\n');
+        const objects = ['<< /Type /Catalog /Pages 2 0 R >>', '<< /Type /Pages /Kids [3 0 R] /Count 1 >>', '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>', `<< /Length ${content.length} >>\nstream\n${content}\nendstream`, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'];
+        let pdf = '%PDF-1.4\n'; const offsets = [0];
+        objects.forEach((object, index) => { offsets.push(pdf.length); pdf += `${index + 1} 0 obj\n${object}\nendobj\n`; });
+        const xref = pdf.length; pdf += `xref\n0 6\n0000000000 65535 f \n${offsets.slice(1).map(offset => `${String(offset).padStart(10, '0')} 00000 n `).join('\n')}\ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+        return new Blob([pdf], { type: 'application/pdf' });
+      }
+      function download(company, kind) {
+        const isResume = kind === 'resume';
+        const cv = company.application.tailoredCv;
+        const text = isResume
+          ? [`${cv.title}`, cv.summary, `Compétences : ${cv.skills.join(', ')}`, ...cv.experiences.flatMap(item => [item.title, item.summary, item.skills.length ? `Compétences : ${item.skills.join(', ')}` : ''])]
+          : [company.application.email.subject, '', company.application.coverLetter];
+        const link = document.createElement('a'); link.href = URL.createObjectURL(makePdf(`${isResume ? 'CV adapté' : 'Lettre de motivation'} - ${company.name}`, wrap(text.join('\n')))); link.download = `${kind}-${company.name.toLowerCase().replace(/\W+/g, '-')}.pdf`; link.click(); URL.revokeObjectURL(link.href);
+      }
+      function contactMarkup(contact) {
+        if (contact.type === 'email') return `<a class="contact-link" href="mailto:${encodeURIComponent(contact.value)}">✉ ${escapeHtml(contact.value)}</a>`;
+        if (contact.type === 'url') return `<a class="contact-link" href="${escapeHtml(contact.value)}" target="_blank" rel="noreferrer">↗ Page contact</a>`;
+        return '<span class="company-meta">Contact public non trouvé</span>';
+      }
+      function renderResults(result) {
+        resultTitle.textContent = `${result.companies.length} candidatures personnalisées prêtes.`;
+        resultTotal.textContent = `${result.sourceMode === 'live' ? 'Sources récentes' : 'Cache démo'} · Monde entier`;
+        companyList.replaceChildren(...result.companies.map(company => {
+          const card = document.createElement('article'); card.className = 'company-card';
+          const skills = company.matchedSkills.length ? company.matchedSkills : ['Secteur compatible'];
+          const cv = company.application.tailoredCv;
+          card.innerHTML = `<div><h3>${escapeHtml(company.name)}</h3><p>${escapeHtml(company.description)}</p><p class="company-meta">Levée : ${escapeHtml(formatDate(company.fundingDate))}${company.websiteUrl ? ` · <a href="${escapeHtml(company.websiteUrl)}" target="_blank" rel="noreferrer">Site officiel</a>` : ''}</p><p class="company-meta">Dirigeant légal : ${escapeHtml(company.legalRepresentative || 'non identifié')}</p>${contactMarkup(company.contact)}</div><div><div>${skills.map(skill => `<span class="pill">${escapeHtml(skill)}</span>`).join('')}</div><p class="company-meta">${escapeHtml(company.scoreReason)}</p></div><div><div class="score">${Math.round(company.score * 100)}%<small>Match score</small></div><button class="pdf-button" data-kind="resume">CV adapté PDF</button><button class="pdf-button" data-kind="letter">Lettre PDF</button><button class="pdf-button" data-copy>Copier l’email</button></div><details><summary>Voir l’email et les documents adaptés</summary><div class="document-preview"><article><h4>${escapeHtml(company.application.email.subject)}</h4><pre>${escapeHtml(company.application.email.body)}</pre></article><article><h4>${escapeHtml(cv.title)}</h4><pre>${escapeHtml(cv.summary)}\n\nCompétences : ${escapeHtml(cv.skills.join(', ') || 'à préciser')}</pre></article></div></details>`;
+          card.querySelectorAll('[data-kind]').forEach(button => button.addEventListener('click', () => download(company, button.dataset.kind)));
+          card.querySelector('[data-copy]').addEventListener('click', async event => { const button = event.currentTarget; if (company.contact.type !== 'email') { button.textContent = 'Pas d’email public'; return; } await navigator.clipboard.writeText(company.contact.value); button.textContent = 'Email copié ✓'; setTimeout(() => { button.textContent = 'Copier l’email'; }, 1800); });
+          return card;
+        }));
+        if (result.warnings.length) { const warning = document.createElement('p'); warning.className = 'warning'; warning.textContent = result.warnings.join(' · '); companyList.prepend(warning); }
+        resultsView.classList.remove('hidden'); resultsView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      function toBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(',')[1]); reader.onerror = () => reject(new Error('Impossible de lire le fichier.')); reader.readAsDataURL(file); }); }
+      form.addEventListener('submit', async event => {
+        event.preventDefault(); const file = fileInput.files[0]; const motivationLetter = document.querySelector('#motivation').value.trim(); const geographicZone = document.querySelector('#location').value;
+        status.className = 'form-status';
+        if (!file || !motivationLetter) { status.textContent = 'Ajoutez votre CV et votre lettre de motivation.'; status.classList.add('error'); return; }
+        if (file.size > 4 * 1024 * 1024) { status.textContent = 'Votre CV doit faire 4 Mo maximum.'; status.classList.add('error'); return; }
+        runButton.disabled = true; runButton.textContent = 'Scanning opportunities…'; status.textContent = 'Analyse du CV, recherche des levées récentes et préparation des candidatures…';
+        try {
+          const response = await fetch('/api/analyze', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ fileName: file.name, mimeType: file.type, fileBase64: await toBase64(file), motivationLetter, geographicZone }) });
+          const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Analyse impossible.'); renderResults(result); status.textContent = result.sourceMode === 'live' ? 'Analyse terminée avec les sources récentes.' : 'Analyse terminée avec le cache de démonstration.';
+        } catch (error) { status.textContent = error.message || 'Analyse impossible.'; status.classList.add('error'); }
+        finally { runButton.disabled = false; runButton.textContent = 'Find my matches →'; }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+[build]
+  command = "pnpm check"
+  publish = "public"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  included_files = ["data/role1-results.json"]
