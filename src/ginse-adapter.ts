@@ -76,6 +76,16 @@ function parseProviderRequest(value: unknown): GinseInput {
   return parseInput(value);
 }
 
+function providerIdempotencyKey(request: Request, body: unknown): string {
+  const envelope = body && typeof body === "object" && !Array.isArray(body) ? body as Record<string, unknown> : {};
+  const bodyKey = envelope.idempotency_key ?? envelope.idempotencyKey;
+  if (typeof bodyKey === "string" && bodyKey.trim()) return bodyKey.trim();
+  return request.headers.get("idempotency-key")?.trim()
+    ?? request.headers.get("x-idempotency-key")?.trim()
+    ?? request.headers.get("x-ginse-idempotency-key")?.trim()
+    ?? "";
+}
+
 export function validateOutput(value: CandidateAgentOutput): CandidateAgentOutput {
   if (
     !value ||
@@ -158,12 +168,13 @@ export async function runGinseOperation(request: Request): Promise<Response> {
   }
 
   try {
-    const idempotencyKey = request.headers.get("idempotency-key")?.trim() ?? "";
+    const body = await request.json();
+    const idempotencyKey = providerIdempotencyKey(request, body);
     if (!/^[A-Za-z0-9._-]{8,200}$/.test(idempotencyKey)) {
       return response({ error: "A valid Idempotency-Key is required." }, 400);
     }
 
-    const input = parseProviderRequest(await request.json());
+    const input = parseProviderRequest(body);
     const store = operationStore();
     const requestFingerprint = fingerprint(input);
     const providerOperationId = operationId(requestFingerprint);
