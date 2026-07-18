@@ -78,17 +78,12 @@ function parseProviderRequest(value: unknown): GinseInput {
 
 function providerIdempotencyKey(request: Request, body: unknown): string {
   const envelope = body && typeof body === "object" && !Array.isArray(body) ? body as Record<string, unknown> : {};
-  const bodyKey = envelope.idempotency_key
-    ?? envelope.idempotencyKey
-    ?? envelope.run_id
-    ?? envelope.runId
-    ?? envelope.operation_id
-    ?? envelope.operationId;
-  if (typeof bodyKey === "string" && bodyKey.trim()) return bodyKey.trim();
-  return request.headers.get("idempotency-key")?.trim()
+  const headerKey = request.headers.get("idempotency-key")?.trim()
     ?? request.headers.get("x-idempotency-key")?.trim()
-    ?? request.headers.get("x-ginse-idempotency-key")?.trim()
-    ?? "";
+    ?? request.headers.get("x-ginse-idempotency-key")?.trim();
+  if (headerKey) return headerKey;
+  const bodyKey = envelope.idempotency_key ?? envelope.idempotencyKey;
+  return typeof bodyKey === "string" ? bodyKey.trim() : "";
 }
 
 export function validateOutput(value: CandidateAgentOutput): CandidateAgentOutput {
