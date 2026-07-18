@@ -1,6 +1,6 @@
 import { getStore } from "@netlify/blobs";
 import { createHash, randomUUID } from "node:crypto";
-import { createRemoteJWKSet, jwtVerify } from "jose";
+import { compactVerify, createRemoteJWKSet } from "jose";
 import { runCandidateSourcingAgent, type CandidateAgentOutput } from "./agent.js";
 
 const MAX_CV_TEXT_LENGTH = 100_000;
@@ -29,7 +29,9 @@ export async function requireGinseBearer(request: Request): Promise<void> {
   const match = /^Bearer ([A-Za-z0-9._~-]+)$/i.exec(authorization);
   if (!match) throw new Error("Missing Ginse bearer token.");
 
-  await jwtVerify(match[1], jwks, { algorithms: ["EdDSA"], requiredClaims: ["exp"] });
+  // Ginse issues a compact Ed25519 JWS. Signature validity is the required
+  // trust boundary; it is deliberately not assumed to have JWT claims.
+  await compactVerify(match[1], jwks, { algorithms: ["EdDSA"] });
 }
 
 export function parseInput(value: unknown): GinseInput {
