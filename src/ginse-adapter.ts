@@ -118,12 +118,16 @@ function fingerprint(input: GinseInput): string {
   return createHash("sha256").update(canonicalize(input)).digest("hex");
 }
 
-function operationId(idempotencyKey: string): string {
-  return `goat_${createHash("sha256").update(idempotencyKey).digest("hex")}`;
+function operationId(requestFingerprint: string): string {
+  return `goat_${requestFingerprint}`;
 }
 
 function operationStoreKey(providerOperationId: string): string {
   return `operations/${providerOperationId}`;
+}
+
+function idempotencyStoreKey(idempotencyKey: string): string {
+  return `idempotency/${createHash("sha256").update(idempotencyKey).digest("hex")}`;
 }
 
 function statusUrl(request: Request, providerOperationId: string): string {
@@ -160,18 +164,28 @@ export async function runGinseOperation(request: Request): Promise<Response> {
     }
 
     const input = parseProviderRequest(await request.json());
-    const providerOperationId = operationId(idempotencyKey);
-    const key = operationStoreKey(providerOperationId);
     const store = operationStore();
-    const claimed: StoredOperation = { fingerprint: fingerprint(input), providerOperationId, status: "pending" };
+    const requestFingerprint = fingerprint(input);
+    const providerOperationId = operationId(requestFingerprint);
+    const key = operationStoreKey(providerOperationId);
+    const bindingKey = idempotencyStoreKey(idempotencyKey);
+    const binding: Pick<StoredOperation, "fingerprint" | "providerOperationId"> = { fingerprint: requestFingerprint, providerOperationId };
+    const bindingClaim = await store.setJSON(bindingKey, binding, { onlyIfNew: true });
+
+    if (!bindingClaim.modified) {
+      const savedBinding = await store.get(bindingKey, { type: "json", consistency: "strong" }) as Pick<StoredOperation, "fingerprint" | "providerOperationId"> | null;
+      if (!savedBinding || savedBinding.fingerprint !== requestFingerprint) {
+        return response({ error: "Idempotency-Key was already used with a different request." }, 409);
+      }
+    }
+
+    const claimed: StoredOperation = { fingerprint: requestFingerprint, providerOperationId, status: "pending" };
     const claim = await store.setJSON(key, claimed, { onlyIfNew: true });
 
     if (!claim.modified) {
       const found = await store.get(key, { type: "json", consistency: "strong" }) as StoredOperation | null;
       const saved = found ? await waitForTerminalOperation(key, found) : null;
-      if (!saved || saved.fingerprint !== claimed.fingerprint) {
-        return response({ error: "Idempotency-Key was already used with a different request." }, 409);
-      }
+      if (!saved) return response({ error: "Could not load the claimed operation." }, 500);
       if (saved.status === "succeeded" && saved.output) {
         return response({ status: "succeeded", provider_operation_id: saved.providerOperationId, replayed: true, output: saved.output });
       }
