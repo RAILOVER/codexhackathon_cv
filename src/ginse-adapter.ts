@@ -65,6 +65,17 @@ export function parseInput(value: unknown): GinseInput {
   return { cvText };
 }
 
+function parseProviderRequest(value: unknown): GinseInput {
+  // Ginse transports the marketplace input in an `input` envelope, while the
+  // public schema describes the enclosed value. Retaining support for the
+  // bare form also makes the endpoint easy to test directly.
+  if (value && typeof value === "object" && !Array.isArray(value) && "input" in value) {
+    const envelope = value as Record<string, unknown>;
+    if (Object.keys(envelope).length === 1) return parseInput(envelope.input);
+  }
+  return parseInput(value);
+}
+
 export function validateOutput(value: CandidateAgentOutput): CandidateAgentOutput {
   if (
     !value ||
@@ -134,7 +145,7 @@ export async function runGinseOperation(request: Request): Promise<Response> {
       return response({ error: "A valid Idempotency-Key is required." }, 400);
     }
 
-    const input = parseInput(await request.json());
+    const input = parseProviderRequest(await request.json());
     const providerOperationId = operationId(idempotencyKey);
     const key = operationStoreKey(providerOperationId);
     const store = operationStore();
