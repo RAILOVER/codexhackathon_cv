@@ -133,16 +133,16 @@ function fingerprint(input: GinseInput): string {
   return createHash("sha256").update(canonicalize(input)).digest("hex");
 }
 
-function operationId(requestFingerprint: string): string {
-  return `goat_${requestFingerprint}`;
+function operationId(): string {
+  return `goat_${randomUUID().replace(/-/g, "")}`;
 }
 
 function operationStoreKey(providerOperationId: string): string {
-  return `operations-v4/${providerOperationId}`;
+  return `operations-v5/${providerOperationId}`;
 }
 
 function idempotencyStoreKey(idempotencyKey: string): string {
-  return `idempotency-v4/${createHash("sha256").update(idempotencyKey).digest("hex")}`;
+  return `idempotency-v5/${createHash("sha256").update(idempotencyKey).digest("hex")}`;
 }
 
 function statusUrl(request: Request, providerOperationId: string): string {
@@ -182,19 +182,22 @@ export async function runGinseOperation(request: Request): Promise<Response> {
     const input = parseProviderRequest(body);
     const store = operationStore();
     const requestFingerprint = fingerprint(input);
-    const providerOperationId = operationId(requestFingerprint);
-    const key = operationStoreKey(providerOperationId);
     const bindingKey = idempotencyStoreKey(idempotencyKey);
-    const binding: Pick<StoredOperation, "fingerprint" | "providerOperationId"> = { fingerprint: requestFingerprint, providerOperationId };
+    const binding: Pick<StoredOperation, "fingerprint" | "providerOperationId"> = {
+      fingerprint: requestFingerprint,
+      providerOperationId: operationId(),
+    };
     const bindingClaim = await store.setJSON(bindingKey, binding, { onlyIfNew: true });
-
+    let providerOperationId = binding.providerOperationId;
     if (!bindingClaim.modified) {
       const savedBinding = await store.get(bindingKey, { type: "json", consistency: "strong" }) as Pick<StoredOperation, "fingerprint" | "providerOperationId"> | null;
       if (!savedBinding || savedBinding.fingerprint !== requestFingerprint) {
         return response({ error: "Idempotency-Key was already used with a different request." }, 409);
       }
+      providerOperationId = savedBinding.providerOperationId;
     }
 
+    const key = operationStoreKey(providerOperationId);
     const claimed: StoredOperation = { fingerprint: requestFingerprint, providerOperationId, status: "pending" };
     const claim = await store.setJSON(key, claimed, { onlyIfNew: true });
 
