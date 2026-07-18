@@ -133,11 +133,11 @@ function operationId(): string {
 }
 
 function operationStoreKey(providerOperationId: string): string {
-  return `operations-v6/${providerOperationId}`;
+  return `operations-v7/${providerOperationId}`;
 }
 
 function idempotencyStoreKey(idempotencyKey: string): string {
-  return `idempotency-v6/${createHash("sha256").update(idempotencyKey).digest("hex")}`;
+  return `idempotency-v7/${createHash("sha256").update(idempotencyKey).digest("hex")}`;
 }
 
 function statusUrl(request: Request, providerOperationId: string): string {
@@ -182,7 +182,7 @@ export async function runGinseOperation(request: Request): Promise<Response> {
       fingerprint: requestFingerprint,
       providerOperationId: operationId(),
     };
-    const bindingClaim = await store.setJSON(bindingKey, binding, { onlyIfNew: true });
+    const bindingClaim = await store.set(bindingKey, JSON.stringify(binding), { onlyIfNew: true });
     let providerOperationId = binding.providerOperationId;
     if (!bindingClaim.modified) {
       const savedBinding = await store.get(bindingKey, { type: "json", consistency: "strong" }) as Pick<StoredOperation, "fingerprint" | "providerOperationId"> | null;
@@ -194,7 +194,7 @@ export async function runGinseOperation(request: Request): Promise<Response> {
 
     const key = operationStoreKey(providerOperationId);
     const claimed: StoredOperation = { fingerprint: requestFingerprint, providerOperationId, status: "pending" };
-    const claim = await store.setJSON(key, claimed, { onlyIfNew: true });
+    const claim = await store.set(key, JSON.stringify(claimed), { onlyIfNew: true });
 
     if (!claim.modified) {
       const found = await store.get(key, { type: "json", consistency: "strong" }) as StoredOperation | null;
@@ -214,7 +214,7 @@ export async function runGinseOperation(request: Request): Promise<Response> {
       // every invocation completes within the marketplace verification window.
       const output = validateOutput(await runCandidateSourcingAgent({ cvText: input.cvText, forceCache: true }));
       const completed: StoredOperation = { ...claimed, status: "succeeded", output };
-      const write = await store.setJSON(key, completed, { onlyIfMatch: claim.etag });
+      const write = await store.set(key, JSON.stringify(completed), { onlyIfMatch: claim.etag });
       if (!write.modified) throw new Error("Could not persist the completed operation.");
       return response({ status: "succeeded", provider_operation_id: providerOperationId, replayed: false, output });
     } catch (error) {
@@ -223,7 +223,7 @@ export async function runGinseOperation(request: Request): Promise<Response> {
         status: "failed",
         error: error instanceof Error ? error.message : "Operation failed.",
       };
-      await store.setJSON(key, failed, { onlyIfMatch: claim.etag });
+      await store.set(key, JSON.stringify(failed), { onlyIfMatch: claim.etag });
       return response({ status: "failed", provider_operation_id: providerOperationId, replayed: false, error: failed.error }, 500);
     }
   } catch (error) {
