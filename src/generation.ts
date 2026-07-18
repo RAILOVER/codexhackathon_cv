@@ -30,11 +30,6 @@ function sentence(value: string): string {
   return /[.!?]$/.test(compact) ? compact : `${compact}.`;
 }
 
-function firstNameFromLetter(letter: string): string | null {
-  const match = letter.match(/(?:bien cordialement|cordialement|sincèrement)[,\s]+([A-ZÀ-Ÿ][a-zà-ÿ'-]+)/i);
-  return match?.[1] ?? null;
-}
-
 function candidateTitle(profile: CvProfile): string {
   return profile.targetRoles[0] ?? profile.jobTitles[0] ?? "professionnel·le motivé·e";
 }
@@ -45,20 +40,13 @@ function companyMoment(funding: ScoredFunding): string {
     : "à un moment important de votre développement";
 }
 
-function motivationStyle(letter: string): "direct" | "formel" {
-  return /bonjour|cordialement|madame|monsieur/i.test(letter) ? "formel" : "direct";
-}
-
 /**
  * Factual offline generator used for the hackathon demo. It only uses text
- * extracted from the CV, the user's motivation text and verified company data.
- * A future LLM provider can replace this function without changing the API
- * contract consumed by the interface.
+ * extracted from the CV and verified company data.
  */
 export function generateApplication(
   profile: CvProfile,
   funding: ScoredFunding,
-  motivationLetter = "",
 ): GeneratedApplication {
   const title = candidateTitle(profile);
   const skills = profile.skills.slice(0, 8);
@@ -66,8 +54,6 @@ export function generateApplication(
   const skillText = skills.length > 0 ? skills.slice(0, 4).join(", ") : "mes compétences et mon expérience";
   const director = funding.legal?.legalRepresentative?.fullName;
   const greeting = director ? `Bonjour ${director},` : "Bonjour,";
-  const signOff = firstNameFromLetter(motivationLetter);
-  const style = motivationStyle(motivationLetter);
   const tailoredSummary = [
     `Profil orienté ${title}, avec un intérêt particulier pour ${funding.companyName} et son secteur.`,
     skills.length > 0 ? `Compétences mises en avant : ${skills.slice(0, 6).join(", ")}.` : "Compétences à préciser depuis le CV source.",
@@ -76,7 +62,7 @@ export function generateApplication(
   const relevantExperience = experience
     ? sentence(experience.summary || `Expérience : ${experience.title}`)
     : "Mon parcours me permet d’apporter une contribution opérationnelle et structurée.";
-  const intro = style === "formel" ? "Je vous adresse ma candidature spontanée" : "Je souhaite vous proposer ma candidature";
+  const intro = "Je souhaite vous proposer ma candidature";
 
   return {
     email: {
@@ -91,7 +77,6 @@ export function generateApplication(
         `Je serais ravi·e d’échanger sur la manière dont je pourrais contribuer aux prochains enjeux de ${funding.companyName}.`,
         "",
         "Bien cordialement,",
-        signOff ?? "",
       ].filter((line, index, lines) => line || (index > 0 && lines[index - 1] !== "")).join("\n"),
     },
     coverLetter: [
@@ -111,17 +96,14 @@ export function generateApplication(
 }
 
 /**
- * Improves only the cover letter through the OpenAI SDK. On Netlify, the bare
- * SDK instance automatically uses AI Gateway credentials; locally, a standard
- * OPENAI_API_KEY works too. The fallback keeps the demo usable if AI is not
- * enabled yet or if the gateway has no remaining credits.
+ * Improves only the cover letter through the OpenAI SDK when server-side
+ * credentials are available. The fallback keeps the agent usable without AI.
  */
 export async function generateApplicationWithLlm(
   profile: CvProfile,
   funding: ScoredFunding,
-  motivationLetter = "",
 ): Promise<ApplicationGenerationResult> {
-  const application = generateApplication(profile, funding, motivationLetter);
+  const application = generateApplication(profile, funding);
 
   if (!process.env.OPENAI_API_KEY) {
     return { application, usedLlm: false };

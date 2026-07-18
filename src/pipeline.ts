@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { extractCvProfileHeuristically } from "./cv-profile.js";
+import { extractCvProfile } from "./cv-profile.js";
 import { findPublicContact } from "./contact-finder.js";
 import { generateApplicationWithLlm, type GeneratedApplication } from "./generation.js";
 import { scrapeRecentFundings } from "./maddyness.js";
@@ -10,10 +10,7 @@ import { rankFundingsForProfile } from "./scoring.js";
 import type { ContactEnrichedFunding, CvProfile, LegalCompany, PublicContact, ScoredFunding } from "./types.js";
 
 const ROLE1_CACHE_PATHS = [
-  // Local TypeScript execution (tsx) keeps the source-relative path intact.
   fileURLToPath(new URL("../data/role1-results.json", import.meta.url)),
-  // Netlify includes this file through netlify.toml and exposes it from the
-  // deployed function working directory.
   resolve(process.cwd(), "data/role1-results.json"),
 ];
 const MAX_RESULTS = 6;
@@ -144,11 +141,10 @@ async function loadLiveFundings(profile: CvProfile): Promise<{ fundings: Contact
 async function toDemoCompany(
   funding: ScoredFunding,
   profile: CvProfile,
-  motivationLetter: string,
 ): Promise<{ company: DemoCompany; warning?: string }> {
   const email = funding.contact.email;
   const contactPage = funding.contact.contactPageUrl;
-  const generated = await generateApplicationWithLlm(profile, funding, motivationLetter);
+  const generated = await generateApplicationWithLlm(profile, funding);
 
   return {
     company: {
@@ -178,15 +174,15 @@ async function toDemoCompany(
 /** Runs the complete sourcing/matching/generation sequence used by the website. */
 export async function runApplicationPipeline({
   cvText,
-  motivationLetter = "",
   forceCache = false,
 }: {
   cvText: string;
-  motivationLetter?: string;
   forceCache?: boolean;
 }): Promise<PipelineResult> {
-  const profile = extractCvProfileHeuristically(cvText);
+  const extracted = await extractCvProfile(cvText);
+  const profile = extracted.profile;
   const warnings: string[] = [];
+  if (extracted.warning) warnings.push(extracted.warning);
   let sourceMode: PipelineResult["sourceMode"] = "live";
   let fundings: ContactEnrichedFunding[];
 
@@ -207,12 +203,12 @@ export async function runApplicationPipeline({
   }
 
   const ranked = rankFundingsForProfile(profile, fundings, MAX_RESULTS);
-  if (profile.skills.length === 0 && profile.jobTitles.length === 0) {
-    warnings.push("Peu d’informations ont été extraites du CV : vérifiez que le PDF contient du texte sélectionnable.");
+  if (profile.skills.length < 2 && profile.jobTitles.length === 0 && profile.experiences.length === 0) {
+    warnings.push("Le PDF contient peu de texte de CV exploitable. Vérifiez qu’il s’agit bien d’un CV exporté (et non d’une image ou d’un aperçu Canva) et qu’il contient du texte sélectionnable.");
   }
 
   const generatedCompanies = await Promise.all(
-    ranked.fundings.map((funding) => toDemoCompany(funding, profile, motivationLetter)),
+    ranked.fundings.map((funding) => toDemoCompany(funding, profile)),
   );
   warnings.push(...generatedCompanies.flatMap((result) => result.warning ? [result.warning] : []));
 

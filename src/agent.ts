@@ -45,8 +45,8 @@ async function cvTextFromInput(input: CandidateAgentInput): Promise<{ text: stri
 }
 
 /**
- * The product’s portable agent contract. It contains no HTTP/UI concerns, so a
- * Ginse task, a CLI, or the Netlify function can all invoke the exact same run.
+ * The portable agent contract. A CLI or an API endpoint can invoke the same
+ * function without depending on a website or a framework.
  */
 export async function runCandidateSourcingAgent(input: CandidateAgentInput): Promise<CandidateAgentOutput> {
   const cv = await cvTextFromInput(input);

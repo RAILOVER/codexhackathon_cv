@@ -12,3 +12,14 @@ data/*.txt
 .netlify/
 .agents/
 skills-lock.json
+
+# Local CV fixtures and test outputs: never publish uploaded CVs or generated reports.
+/TEST_SUMMARY.txt
+/cv-extraction-test-report.txt
+/cv-biochercheur-base64.txt
+/extraction_results.json
+/extract-and-run.mjs
+/*-input.json
+/*-output*.json
+/cv-input*.json
+/data/cv-*-input.json

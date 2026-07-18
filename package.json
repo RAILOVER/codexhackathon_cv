@@ -1,5 +1,5 @@
 {
-  "name": "candidature-spontanee-agent",
+  "name": "goat-your-job-agent",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -8,16 +8,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "scrape:fundings": "tsx src/run-scrape.ts",
-    "enrich:legal": "tsx src/run-enrich-legal.ts",
-    "find:contacts": "tsx src/run-find-contacts.ts",
-    "extract:cv": "tsx src/run-extract-cv.ts",
-    "score:matches": "tsx src/run-score-matches.ts",
-    "export:role1": "tsx src/run-export-role1.ts",
     "agent:run": "tsx src/run-agent.ts",
-    "check": "tsc --noEmit",
-    "dev": "tsx src/server.ts",
-    "start": "tsx src/server.ts"
+    "check": "tsc --noEmit"
   },
   "dependencies": {
     "@netlify/functions": "5.1.0",

@@ -3,6 +3,23 @@ import { PDFParse } from "pdf-parse";
 const MIN_EXTRACTED_CHARACTERS = 40;
 
 /**
+ * Keep the document's logical lines.  CVs routinely use headings, bullets and
+ * two-column layouts; flattening every whitespace character makes it
+ * impossible for the profile parser to distinguish a skill list from an
+ * experience description.
+ */
+function preservePdfLines(value: string): string {
+  return value
+    .replace(/\r\n?/g, "\n")
+    .replace(/\u00a0/g, " ")
+    .split("\n")
+    .map((line) => line.replace(/[\t\f\v ]+/g, " ").trim())
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+}
+
+/**
  * Extracts selectable text from a PDF CV. Scanned/image-only PDFs deliberately
  * fail with a clear error: inventing a profile from an unreadable CV would make
  * the matching and generated applications unreliable.
@@ -12,7 +29,7 @@ export async function extractTextFromPdf(pdf: Buffer): Promise<string> {
 
   try {
     const result = (await parser.getText()) as { text?: string };
-    const text = result.text?.replace(/\s+/g, " ").trim() ?? "";
+    const text = preservePdfLines(result.text ?? "");
 
     if (text.length < MIN_EXTRACTED_CHARACTERS) {
       throw new Error(
